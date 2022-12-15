@@ -1,3 +1,5 @@
+
+
 class DCMotor {
 public:
     DCMotor(int enablePin, int in1Pin, int in2Pin)
@@ -63,13 +65,19 @@ public:
     }
 
     // Makes LED blink (n) amount of times.
-    void blinkLight(int id) {
-        // Loop until the specified number of cycles have been completed.
-        // Switch the LED on or off.
-        this->switchLight(id);
-      	delay(400);
-        this->switchLight(id);
-    }
+	void blinkLight(int id) {
+      // Switch the LED on or off.
+      this->switchLight(id);
+
+      // Wait for 0.5 seconds before switching the LED again.
+      delay(200);
+
+      // Turn the LED off before starting the next cycle.
+      this->turnLightOff(id);
+
+      // Wait for 0.5 seconds before starting the next cycle.
+      delay(200);
+	}
 };
 
 
@@ -90,6 +98,7 @@ enum State {
 
 void setup() {
     // Put your setup code here
+  	pinMode(5,OUTPUT);
 }
 
 void loop() {
@@ -97,28 +106,24 @@ void loop() {
     switch (state) {
         case STOPPED:
             // If the "UP" button is pressed, start the motor in the forward direction.
-            if (digitalRead(upButtonPin) == HIGH)
-            {
+            if (digitalRead(upButtonPin) == HIGH) {
                 motor.start();
                 state = FORWARD;
             }
                 // If the "DOWN" button is pressed, start the motor in the reverse direction.
-            else if (digitalRead(downButtonPin) == HIGH)
-            {
+            else if (digitalRead(downButtonPin) == HIGH) {
                 motor.reverse();
                 state = REVERSE;
             }
             break;
         case FORWARD:
             // If the "STOP" button is pressed, stop the motor.
-            if (digitalRead(emergencyStopButtonPin) == HIGH)
-            {
+            if (digitalRead(emergencyStopButtonPin) == HIGH) {
                 motor.stop();
                 state = STOPPED;
             }
                 // If the "PAUSE" button is pressed, stop the motor and blink the LED.
-            else if (digitalRead(pauseButtonPin) == HIGH)
-            {
+            else if (digitalRead(pauseButtonPin) == HIGH) {
                 motor.stop();
                 LC.blinkLight(warningLEDLightPin);
                 state = STOPPED;
@@ -126,18 +131,27 @@ void loop() {
             break;
         case REVERSE:
             // If the "STOP" button is pressed, stop the motor.
-            if (digitalRead(emergencyStopButtonPin) == HIGH)
-            {
+            if (digitalRead(emergencyStopButtonPin) == HIGH) {
                 motor.stop();
                 state = STOPPED;
             }
                 // If the "PAUSE" button is pressed, stop the motor and blink the LED.
-            else if (digitalRead(pauseButtonPin) == HIGH)
-            {
+            else if (digitalRead(pauseButtonPin) == HIGH) {
                 motor.stop();
                 LC.blinkLight(warningLEDLightPin);
                 state = STOPPED;
             }
+            break;
+    }
+
+    switch (state) {
+        case FORWARD:
+            LC.blinkLight(warningLEDLightPin);
+            break;
+        case REVERSE:
+            LC.blinkLight(warningLEDLightPin);
+            break;
+        case STOPPED:
             break;
     }
 
